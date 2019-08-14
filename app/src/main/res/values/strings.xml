@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">kotlin_maps</string>
     <string name="title_activity_maps">Kotlin - Maps</string>
+    <string name="title_activity_inserir_patrim">inserirPatrim</string>
 </resources>
