@@ -19,4 +19,22 @@
         android:layout_height="wrap_content"
         android:text="Tirar foto!" android:visibility="visible" android:id="@+id/capture"/>
 
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:hint="NOME PATRIMÔNIO"
+            android:ems="10"
+            android:layout_margin="50px"
+            android:id="@+id/editNomePatri"/>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="TAG ID"
+            android:ems="10"
+            android:layout_margin="50px"
+            android:id="@+id/tagPatri"
+            />
+
+
 </LinearLayout>
