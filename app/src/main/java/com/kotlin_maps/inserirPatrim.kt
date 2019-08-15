@@ -1,17 +1,11 @@
 package com.kotlin_maps
 
 import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
-import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 import kotlinx.android.synthetic.main.activity_inserir_patrim.*
@@ -19,18 +13,46 @@ import kotlinx.android.synthetic.main.activity_maps.*
 import android.app.PendingIntent
 import android.graphics.Color
 import android.nfc.NfcAdapter
-import android.provider.Settings
-import android.widget.Toast
 import kotlin.experimental.and
+import android.Manifest
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.multidex.MultiDex
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.OnSuccessListener
+//import kotlinx.android.synthetic.main.activity_gps.*
 
 
-class inserirPatrim : AppCompatActivity(), View.OnClickListener {
+class inserirPatrim : AppCompatActivity(), View.OnClickListener, GoogleApiClient.ConnectionCallbacks,
+GoogleApiClient.OnConnectionFailedListener {
 
     private val CAMERA_REQUEST_CODE = 12345
     private val REQUEST_GALLERY_CAMERA = 45654
 
     var nfcAdapter: NfcAdapter? = null
     var pendingIntent: PendingIntent? = null
+
+    private val TAG = "GpsActivity"
+    private lateinit var mGoogleApiClient: GoogleApiClient
+    private var mLocationManager: LocationManager? = null
+    lateinit var mLocation: Location
+
+    lateinit var locationManager: LocationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +74,18 @@ class inserirPatrim : AppCompatActivity(), View.OnClickListener {
             Intent(this, this.javaClass)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0
         )
+        /* gps initialize */
+        MultiDex.install(this)
+
+        mGoogleApiClient = GoogleApiClient.Builder(this)
+            .addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this)
+            .addApi(LocationServices.API)
+            .build()
+
+        mLocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        checkLocation()
 
     }
 
@@ -142,5 +176,79 @@ class inserirPatrim : AppCompatActivity(), View.OnClickListener {
             factor *= 256L
         }
         return result
+    }
+    /* gps functions */
+    override fun onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    override fun onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    override fun onConnectionSuspended(p0: Int) {
+
+        Log.i(TAG, "Connection Suspended");
+        mGoogleApiClient.connect();
+    }
+
+    override fun onConnectionFailed(connectionResult: ConnectionResult) {
+        Log.i(TAG, "Connection failed. Error: " + connectionResult.getErrorCode());
+    }
+
+    /*override fun onLocationChanged(location: Location) {
+        var msg = "Updated Location: Latitude " + location.longitude.toString() + location.longitude;
+        txt_latitude.setText(""+location.latitude);
+        txt_longitude.setText(""+location.longitude);
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }*/
+
+    override fun onConnected(p0: Bundle?) {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+
+        var fusedLocationProviderClient :
+                FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationProviderClient .getLastLocation()
+            .addOnSuccessListener(this, OnSuccessListener<Location> { location ->
+                // Got last known location. In some rare situations this can be null.
+                if (location != null) {
+                    // Logic to handle location object
+                    mLocation = location
+                    txt_latitude.setText("" + mLocation.latitude)
+                    txt_longitude.setText("" + mLocation.longitude)
+                }
+            })
+    }
+    private fun checkLocation(): Boolean {
+        if(!isLocationEnabled())
+            showAlert();
+        return isLocationEnabled();
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun showAlert() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setTitle("Enable Location")
+            .setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " + "use this app")
+            .setPositiveButton("Location Settings", DialogInterface.OnClickListener { paramDialogInterface, paramInt ->
+                val myIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(myIntent)
+            })
+            .setNegativeButton("Cancel", DialogInterface.OnClickListener { paramDialogInterface, paramInt -> })
+        dialog.show()
     }
 }
