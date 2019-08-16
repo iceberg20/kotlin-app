@@ -94,7 +94,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         @JvmField
         // val url = "https://raw.githubusercontent.com/irontec/android-kotlin-samples/master/common-data/bilbao.json"
-        val urlN = "https://server2.planetgroupbd.com/ords/pepsi/v1/outlet/118786"
+        //val urlN = "https://server2.planetgroupbd.com/ords/pepsi/v1/outlet/118786"
+        val urlN = "https://jsonplaceholder.typicode.com/todos/1"
 
     }
 }

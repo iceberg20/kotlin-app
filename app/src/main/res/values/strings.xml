@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">kotlin_maps</string>
     <string name="title_activity_maps">Kotlin - Maps</string>
+    <string name="weather_api_key">aa18ba9b53747f0876ca33e80216459c</string>
+    <string name="weather_api_key_name">Default</string>
+
+
 </resources>
