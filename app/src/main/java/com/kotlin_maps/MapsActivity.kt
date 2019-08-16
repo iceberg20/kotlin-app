@@ -95,7 +95,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         @JvmField
         // val url = "https://raw.githubusercontent.com/irontec/android-kotlin-samples/master/common-data/bilbao.json"
         //val urlN = "https://server2.planetgroupbd.com/ords/pepsi/v1/outlet/118786"
-        val urlN = "https://jsonplaceholder.typicode.com/todos/1"
+        //val urlN = "https://jsonplaceholder.typicode.com/todos/1"
+        //val urlN = "http://api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=aa18ba9b53747f0876ca33e80216459c"
+        val urlN = "http://api.openweathermap.org/data/2.5/weather?lat=-5.8105124&lon=-35.2001164&APPID=aa18ba9b53747f0876ca33e80216459c"
 
     }
 }
